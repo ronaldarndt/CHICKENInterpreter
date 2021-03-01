@@ -25,7 +25,7 @@ namespace CHICKENInterpreter
             m_stack = new();
 
             m_stack.Push(m_stack);
-            m_stack.Push(args[1]);
+            m_stack.Push(string.Join(" ", args[1..]));
 
             using (var fs = File.OpenRead(path))
             using (var sr = new StreamReader(fs))
