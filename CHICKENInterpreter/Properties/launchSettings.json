@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CHICKENInterpreter": {
+      "commandName": "Project",
+      "commandLineArgs": "./99.chn 69"
+    }
+  }
+}
