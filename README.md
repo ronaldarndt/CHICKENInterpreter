@@ -9,7 +9,7 @@ CHICKEN language interpreter. For more information please visit <https://web.arc
 Simply compile and run with arguments. Eg.:
 
 ```shell
-CHICKENInterpreter.exe ".\cat.chn" "hey i have cancer"
+CHICKENInterpreter.exe ".\cat.chn" "hey i have scoliosis"
 ```
 
-and the program should print "hey i have cancer".
+and the program should print "hey i have scoliosis".

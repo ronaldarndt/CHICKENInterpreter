@@ -7,9 +7,9 @@ namespace CHICKENInterpreter
 {
     class Program
     {
-        private static Stack<object> m_stack;
-        private static int m_pointer { get; set; } = 2;
-        private static int lineNumber => m_pointer - 2;
+        private static Stack<object> s_stack;
+        private static int s_pointer = 2;
+        private static int s_lineNumber => s_pointer - 2;
 
         static void Main(string[] args)
         {
@@ -22,10 +22,10 @@ namespace CHICKENInterpreter
                 return;
             }
 
-            m_stack = new();
+            s_stack = new();
 
-            m_stack.Push(m_stack);
-            m_stack.Push(string.Join(" ", args[1..]));
+            s_stack.Push(s_stack);
+            s_stack.Push(string.Join(" ", args[1..]));
 
             using (var fs = File.OpenRead(path))
             using (var sr = new StreamReader(fs))
@@ -44,26 +44,26 @@ namespace CHICKENInterpreter
 
                     if (impostor > -1)
                     {
-                        throw new Exception($"Runtime syntax error. Impostor found in line #{lineNumber}, token #{impostor + 1}");
+                        throw new Exception($"Runtime syntax error. Line #{s_lineNumber}, token #{impostor + 1} kinda sus");
                     }
 
-                    m_stack.Push(chickens.Length);
+                    s_stack.Push(chickens.Length);
                 } while (line != null);
             }
 
-            m_stack.Push(0);
+            s_stack.Push(0);
 
-            while (m_pointer < m_stack.Count)
+            while (s_pointer < s_stack.Count)
             {
-                var line = PeekAt(m_pointer);
+                var line = PeekAt(s_pointer);
 
                 switch (line)
                 {
                     case 0:
-                        m_pointer = m_stack.Count;
+                        s_pointer = s_stack.Count;
                         break;
                     case 1:
-                        m_stack.Push("chicken");
+                        s_stack.Push("chicken");
                         break;
                     case 2:
                         Add();
@@ -94,26 +94,25 @@ namespace CHICKENInterpreter
                         break;
                 }
 
-
-                m_pointer++;
+                s_pointer++;
             }
 
-            Console.WriteLine(m_stack.Pop());
+            Console.WriteLine(s_stack.Pop());
 
             Console.ReadKey();
         }
 
         private static void Add()
         {
-            var (op1, op2) = (m_stack.Pop(), m_stack.Pop());
+            var (op1, op2) = (s_stack.Pop(), s_stack.Pop());
 
             try
             {
-                m_stack.Push((int)op2 + (int)op1);
+                s_stack.Push((int)op2 + (int)op1);
             }
-            catch (Exception)
+            catch
             {
-                m_stack.Push($"{op2}{op1}");
+                s_stack.Push($"{op2}{op1}");
             }
         }
 
@@ -121,26 +120,26 @@ namespace CHICKENInterpreter
         {
             var (op1, op2) = (PopTopInt(), PopTopInt());
 
-            m_stack.Push(op2 - op1);
+            s_stack.Push(op2 - op1);
         }
 
         private static void Mul()
         {
             var (op1, op2) = (PopTopInt(), PopTopInt());
 
-            m_stack.Push(op1 * op2);
+            s_stack.Push(op1 * op2);
         }
 
         private static void Comp()
         {
-            var (op1, op2) = (m_stack.Pop(), m_stack.Pop());
+            var (op1, op2) = (s_stack.Pop(), s_stack.Pop());
 
-            m_stack.Push(op1 == op2);
+            s_stack.Push(op1 == op2);
         }
 
         private static void Load()
         {
-            var sourceIdx = PeekAt(++m_pointer);
+            var sourceIdx = PeekAt(++s_pointer);
             var idx = PopTopInt();
 
             object el;
@@ -160,32 +159,32 @@ namespace CHICKENInterpreter
                 }
             }
 
-            m_stack.Push(el);
+            s_stack.Push(el);
         }
 
         private static void Store()
         {
             var addr = PopTopInt();
-            var val = m_stack.Pop();
+            var val = s_stack.Pop();
 
-            if (addr < m_stack.Count)
+            if (addr < s_stack.Count)
             {
-                var list = m_stack.ToList();
+                var list = s_stack.ToList();
                 list.Reverse();
                 list[addr] = val;
 
-                m_stack = new Stack<object>(list);
+                s_stack = new Stack<object>(list);
             }
         }
 
         private static void Jmp()
         {
             var stackOffset = PopTopInt();
-            var flag = m_stack.Pop().ToString();
+            var flag = s_stack.Pop().ToString();
 
             if (flag != "0" && (bool.TryParse(flag.ToString(), out var res) && res || !string.IsNullOrWhiteSpace(flag)))
             {
-                m_pointer += stackOffset;
+                s_pointer += stackOffset;
             }
         }
 
@@ -193,17 +192,17 @@ namespace CHICKENInterpreter
         {
             var top = PopTopInt();
 
-            m_stack.Push((char)top);
+            s_stack.Push((char)top);
         }
 
         private static void PushN(object n)
         {
-            m_stack.Push((int)n - 10);
+            s_stack.Push((int)n - 10);
         }
 
         private static int PopTopInt()
         {
-            var op = m_stack.Pop();
+            var op = s_stack.Pop();
 
             if (int.TryParse(op.ToString(), out var n))
             {
@@ -215,7 +214,7 @@ namespace CHICKENInterpreter
 
         private static object PeekAt(int index)
         {
-            return m_stack.ElementAt(m_stack.Count - index - 1);
+            return s_stack.ElementAt(s_stack.Count - index - 1);
         }
     }
 }
